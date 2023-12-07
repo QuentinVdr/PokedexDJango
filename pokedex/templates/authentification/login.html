@@ -1,0 +1,26 @@
+<!-- FILEPATH: /c:/Users/EPSI/Documents/EPSI/2023-2024/Python/PokedexDJango/PokedexDJango/templates/login.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connexion</title>
+</head>
+<body>
+    {% if error %}
+        <p>{{ error }}</p>
+    {% endif %}
+    <h1>Connexion</h1>
+    
+    <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        
+        <label for="username">Nom d'utilisateur :</label>
+        <input type="text" id="username" name="username" required>
+        
+        <label for="password">Mot de passe :</label>
+        <input type="password" id="password" name="password" required>
+        
+        <button type="submit">Se connecter</button>
+    </form>
+</body>
+</html>
