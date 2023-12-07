@@ -1,14 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Liste des Pokémon</title>
-</head>
-<body>
-    <h1>Liste des Pokémon</h1>
-    <ul>
-        {% for pokemon_name in pokemon_names %}
-            <li>{{ pokemon_name }}</li>
+<table>
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Génération</th>
+            <th>Type(s)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td colspan="3">
+                <form method="GET" action="{% url 'search_pokemon' %}">
+                    <input type="text" name="search" placeholder="Rechercher un Pokémon par nom">
+                    <button type="submit">Rechercher</button>
+                </form>
+            </td>
+        </tr>
+        {% for pokemon in pokemon_list %}
+            <tr>
+                <td>{{ pokemon.name }}</td>
+                <td>{{ pokemon.generation }}</td>
+                <td>{{ pokemon.types | join:", " }}</td>
+            </tr>
         {% endfor %}
-    </ul>
-</body>
-</html>
+    </tbody>
+</table>
