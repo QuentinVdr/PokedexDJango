@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Liste des Pokémon</title>
+</head>
+<body>
+    <h1>Liste des Pokémon</h1>
+    <ul>
+        {% for pokemon_name in pokemon_names %}
+            <li>{{ pokemon_name }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
