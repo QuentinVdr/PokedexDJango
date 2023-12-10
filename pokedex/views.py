@@ -1,6 +1,8 @@
 from django.core.cache import cache
 import requests
 from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from requests.exceptions import RequestException
 from settings import *
 import time
@@ -23,7 +25,11 @@ def get_pokemon_info(url):
     pokemon_data = fetch_pokemon_data(url)
     pokemon_info = {
         'name': pokemon_data['name'],
-        'types': [t['type']['name'] for t in pokemon_data['types']]
+        'types': [t['type']['name'] for t in pokemon_data['types']],
+        'abilities': [ability['ability']['name'] for ability in pokemon_data['abilities']],
+        'stats': {stat['stat']['name']: stat['base_stat'] for stat in pokemon_data['stats']},
+        'moves': [move['move']['name'] for move in pokemon_data['moves']],
+        'image': pokemon_data['sprites']['front_default']
     }
 
     cache.set(url, pokemon_info, timeout=3600)
@@ -37,7 +43,6 @@ def get_pokemon_batch(url):
         for pokemon in data['results']:
             pokemon_info = get_pokemon_info(pokemon['url'])
             pokemon_batch.append(pokemon_info)
-            print(f"Récupération du Pokémon : {pokemon_info['name']}")
 
         return pokemon_batch, data.get('next')
     except RequestException as e:
@@ -50,13 +55,12 @@ def get_all_pokemon(batch_size=100000):
         offset = 0
 
         while True:
-            gen_url = f"{API_URL}?limit={batch_size * 5}&offset={offset}"
+            gen_url = f"{API_URL}?limit={121}&offset={offset}"
             data = fetch_pokemon_data(gen_url)
 
             for pokemon in data['results']:
                 pokemon_info = get_pokemon_info(pokemon['url'])
                 all_pokemon.append(pokemon_info)
-                print(f"Récupération du Pokémon : {pokemon_info['name']}")
 
             if not data.get('next'):
                 break
@@ -114,5 +118,18 @@ def search_pokemon(request):
             return render(request, 'pokedex/index.html', {'pokemon_list': filtered_pokemon, 'query': query})
         else:
             return render(request, 'pokedex/index.html', {'pokemon_list': all_pokemon})
+    except Exception as e:
+        return render(request, 'pokedex/errors.html', {'error_message': f"Erreur : {e}"})
+
+def filter_pokemon_by_type(request):
+    try:
+        type_filter = request.GET.get('type')
+        all_pokemon = cache.get('all_pokemon_data')
+
+        if type_filter and all_pokemon:
+            filtered_pokemon = [pokemon for pokemon in all_pokemon if type_filter.lower() in pokemon['types']]
+            return render(request, 'pokedex/index.html', {'pokemon_list': filtered_pokemon, 'query': type_filter})
+        else:
+            return HttpResponseRedirect(reverse('get_all_pokemon_data'))  # Redirige vers la liste complète si aucun filtre
     except Exception as e:
         return render(request, 'pokedex/errors.html', {'error_message': f"Erreur : {e}"})
