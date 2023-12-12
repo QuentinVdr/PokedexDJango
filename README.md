@@ -7,14 +7,30 @@
 
 ## Installation
 - Clone the repository
-- Install the dependencies
-- Run the server
-
 ```bash
 git clone https://github.com/QuentinVdr/PokedexDJango.git
+```
+- Create a virtual environment
+```bash
+python -m venv ./venv
+# Windows
+.\venv\Scripts\activate
+# Linux/Mac
+source ./venv/bin/activate
+```
+- Install the dependencies
+```bash
 pip install -r requirements.txt
+```
+- Run the server
+```bash
 python manage.py runserver
 ```
+
+> **_NOTE:_**  Don't forget to update the requirements.txt file if you install a new package with
+> ```bash
+> pip freeze > requirements.txt
+> ```
 
 ## Features
 - [ ] List of all pokemons
