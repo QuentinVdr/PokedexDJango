@@ -1,0 +1,46 @@
+{% include 'base/start_html_base.html' with titre="Créer une équipe" navbar="true" %}
+    <h1>Créer une équipe pour combattre dans l'arène</h1>
+    <form method="POST" action="{% url 'create_team'%}">
+        {% csrf_token %}
+        <label for="team_name">Nom de l'équipe :</label>
+        <input type="text" id="team_name" name="team_name" required placeholder="Nom de l'équipe" value="{{ team_name }}"><br><br>
+        <label for="pokemon_1">Pokémon 1 :</label>
+        <select id="pokemon_1" name="pokemon_1" required>
+            {% for pokemon in pokemons %}
+                <option value="{{ pokemon.id }}">{{ pokemon.name }}</option>
+            {% endfor %}
+        </select><br><br>
+        <label for="pokemon_2">Pokémon 2 :</label>
+        <select id="pokemon_2" name="pokemon_2" required>
+            {% for pokemon in pokemons %}
+                <option value="{{ pokemon.id }}">{{ pokemon.name }}</option>
+            {% endfor %}
+        </select><br><br>
+        <label for="pokemon_3">Pokémon 3 :</label>
+        <select id="pokemon_3" name="pokemon_3" required>
+            {% for pokemon in pokemons %}
+                <option value="{{ pokemon.id }}">{{ pokemon.name }}</option>
+            {% endfor %}
+        </select><br><br>
+        <label for="pokemon_4">Pokémon 4 :</label>
+        <select id="pokemon_4" name="pokemon_4" required>
+            {% for pokemon in pokemons %}
+                <option value="{{ pokemon.id }}">{{ pokemon.name }}</option>
+            {% endfor %}
+        </select><br><br>
+        <label for="pokemon_5">Pokémon 5 :</label>
+        <select id="pokemon_5" name="pokemon_5" required>
+            {% for pokemon in pokemons %}
+                <option value="{{ pokemon.id }}">{{ pokemon.name }}</option>
+            {% endfor %}
+        </select><br><br>
+        <label for="pokemon_6">Pokémon 6 :</label>
+        <select id="pokemon_6" name="pokemon_6" required>
+            {% for pokemon in pokemons %}
+                <option value="{{ pokemon.id }}">{{ pokemon.name }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <input type="submit" value="Combattre">
+    </form>
+{% include 'base/end_html_base.html' %}

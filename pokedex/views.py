@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponseRedirect, HttpResponse
-from .models import UserProfile
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from .models import UserProfile, TeamPokemon, Pokemon, Team, Fight
 from django.contrib.auth.decorators import login_required
 import re
 
@@ -78,15 +78,87 @@ def user_pokemon_list(request):
 # user create team
 @login_required(login_url='login')
 def new_team(request):
-    # get all pokemon of the user
+    # check if user has already in fight
     user = request.user
     userProfil = UserProfile.objects.get(user=user)
+    # get all fight of the user
     pokemons = userProfil.pokemon_set.all()
+    if user_in_fight(userProfil):
+        return redirect('fight_history')
     if request.method == "POST":
         team_name = request.POST['team_name']
-        
         team = Team(name=team_name, user=userProfil)
+        pokemon_list_id = []
+        for i in range(1, 7):
+            pokemon_id = request.POST['pokemon_'+str(i)]
+            if pokemon_id:
+                # check if user has this pokemon or selected pokemon is not already in the team
+                pokemon = Pokemon.objects.get(id=pokemon_id)
+                if pokemon.user == userProfil:
+                    if pokemon_id not in pokemon_list_id:
+                        pokemon_list_id.append(pokemon_id)
+                    else:
+                        return render(request, 'team/createTeam.html', {'error': 'Vous ne pouvez pas ajouter deux fois le même pokemon', 'pokemons': pokemons, 'team_name': team_name})
+                else:
+                    return render(request, 'team/createTeam.html', {'error': 'Vous ne pouvez pas ajouter un pokemon qui ne vous appartient pas', 'pokemons': pokemons, 'team_name': team_name})
         team.save()
+        index = 1
+        for pokemon_id in pokemon_list_id:
+            # add pokemon to team
+            pokemon = Pokemon.objects.get(id=pokemon_id)
+            teamPokemon = TeamPokemon(team=team, pokemon=pokemon, order=index)
+            teamPokemon.save()
+            index += 1
+        # create fight
+        fight = Fight(team1=team)
+        fight.save()
+
         return redirect('index')
     else:
-        return render(request, 'team/createTeam.html')
+        return render(request, 'team/createTeam.html', {'pokemons': pokemons})
+
+
+def user_in_fight(userProfil):
+    # get all fight of the user
+    user_team = userProfil.team_set.all()
+    fights = Fight.objects.filter(team1__in=user_team)
+    # if fight is not finished (winner is null)
+    in_fight = False
+    for fight in fights:
+        if fight.winner is None:
+            in_fight = True
+    return in_fight
+
+# fight history
+@login_required(login_url='login')
+def fight_history(request):
+    user = request.user
+    userProfil = UserProfile.objects.get(user=user)
+    # get all fight of the user
+    user_team = userProfil.team_set.all()
+    fights = Fight.objects.filter(team1__in=user_team)
+    list_fight = []
+    in_fight = False
+    for fight in fights:
+        user_win = False
+        if fight.winner is not None:
+            if fight.winner in user_team:
+                user_win = True
+        else:
+            in_fight = True
+        date = fight.date.strftime("%d/%m/%Y %H:%M:%S")
+        team_user = fight.team1 if fight.team1 in user_team else fight.team2
+        team_opponent = fight.team1 if fight.team1 not in user_team else fight.team2 if fight.team2 is not None else ""
+        fight_info = {
+            "date": date,
+            "win": user_win,
+            "team_user": team_user,
+            "team_opponent": team_opponent,
+            "finish": fight.winner is not None
+        }
+        print(fight_info)
+        list_fight.append(fight_info)
+    print(fights)
+    print(list_fight)
+    return render(request, 'fight/history.html', {'list_fight': list_fight, 'in_fight': in_fight})
+
