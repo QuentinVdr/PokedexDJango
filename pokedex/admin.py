@@ -1,4 +1,6 @@
 from django.contrib import admin
-from .models import Person
+from .models import Pokemon, UserProfile
 
-admin.site.register(Person)
+admin.site.register(Pokemon)
+admin.site.register(UserProfile)
+
