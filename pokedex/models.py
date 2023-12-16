@@ -10,6 +10,16 @@ class UserProfile(models.Model):
     
     def __str__(self):
         return self.user.username
+    
+class Pokemon(models.Model):
+    pokemon_api_id = models.IntegerField()
+    name = models.CharField(max_length=200)
+    # team of the pokemon (null if not in a team)
+
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.name
 
 class Team(models.Model):
     name = models.CharField(max_length=200)
@@ -17,14 +27,22 @@ class Team(models.Model):
     
     def __str__(self):
         return self.name
-    
-class Pokemon(models.Model):
-    pokemon_api_id = models.IntegerField()
-    name = models.CharField(max_length=200)
-    # team of the pokemon (null if not in a team)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True, blank=True)
-    number = models.IntegerField(default=0, null=True, blank=True) # number in team (null if not in a team)
-    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+
+class TeamPokemon(models.Model):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    pokemon = models.ForeignKey(Pokemon, on_delete=models.CASCADE)
+    order = models.IntegerField()
     
     def __str__(self):
-        return self.name
+        return self.team.name + " - " + self.pokemon.name
+
+class Fight(models.Model):
+    # team of the pokemon (null if not in a team)
+    team1 = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='team1')
+    team2 = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='team2', null=True, blank=True) # null if fight not started (waiting for a second team)
+    winner = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='winner', null=True, blank=True)
+    date = models.DateTimeField(auto_now_add=True)
+    turn = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='turn', null=True, blank=True)
+    
+    def __str__(self):
+        return str(self.date)
