@@ -112,6 +112,8 @@ def get_filtered_pokemon(query, all_pokemon):
 def search_pokemon(request):
     try:
         query = request.GET.get('search')
+        if query is None:
+            return redirect('index')
         all_pokemon = cache.get('all_pokemon_data')
 
         if query and all_pokemon:
@@ -131,6 +133,9 @@ def search_pokemon(request):
 def filter_pokemon_by_type(request):
     try:
         type_filter = request.GET.get('type')
+        print(type_filter)
+        if type_filter is None:
+            return redirect('index')
         all_pokemon = cache.get('all_pokemon_data')
 
         if type_filter and all_pokemon:
@@ -268,7 +273,7 @@ def team_list(request):
         for pokemon in team_pokemon:
             team_info["pokemon_"+str(pokemon.order)] = {}
             team_info["pokemon_"+str(pokemon.order)]["name"] = pokemon.pokemon.name
-            team_info["pokemon_"+str(pokemon.order)]["id"] = pokemon.pokemon.id
+            team_info["pokemon_"+str(pokemon.order)]["id"] = pokemon.pokemon.pokemon_api_id
         list_team.append(team_info)
     print(list_team)
     success = request.session.get('success', '')
@@ -387,3 +392,8 @@ def update_team(request, team_id):
         request.session['error'] = 'Vous ne pouvez pas modifier cette équipe'
         return redirect('team_list')
     
+def error_404(request, exception):
+    return render(request, 'pokedex/404.html', status=404)
+
+def error_404_page(request):
+    return render(request, 'pokedex/404.html', status=404)

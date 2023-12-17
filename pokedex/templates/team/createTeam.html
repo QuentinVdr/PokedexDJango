@@ -1,52 +1,75 @@
 {% include 'base/start_html_base.html' with titre="Gestion d'équipe" navbar="true" %}
-    <h1>Créer une équipe pour combattre dans l'arène</h1>
+
+<div class="max-w-md mx-auto mt-8 p-6 bg-white rounded-md shadow-md">
+    <h1 class="text-2xl font-bold mb-4">Créer / modifier une équipe</h1>
+
     {% if id_team %}
         <form method="POST" action="{% url url_action id_team %}">
     {% else %}
         <form method="POST" action="{% url url_action %}">
     {% endif %}
         {% csrf_token %}
-        <label for="team_name">Nom de l'équipe :</label>
-        <input type="text" id="team_name" name="team_name" required placeholder="Nom de l'équipe" value="{{ team_name }}"><br><br>
-        <label for="pokemon_1">Pokémon 1 :</label>
-        <select id="pokemon_1" name="pokemon_1" required>
-            {% for pokemon in pokemons %}
-                <option value="{{ pokemon.id }}" {% if pokemon.id == pokemon_list_id.0 %} selected {% endif %}>{{ pokemon.name }}</option>
-            {% endfor %}
-        </select><br><br>
-        <label for="pokemon_2">Pokémon 2 :</label>
-        <select id="pokemon_2" name="pokemon_2" required>
-            {% for pokemon in pokemons %}
-                <option value="{{ pokemon.id }}" {% if pokemon.id == pokemon_list_id.1 %} selected {% endif %}>{{ pokemon.name }}</option>
-            {% endfor %}
-        </select><br><br>
-        <label for="pokemon_3">Pokémon 3 :</label>
-        <select id="pokemon_3" name="pokemon_3" required>
-            {% for pokemon in pokemons %}
-                <option value="{{ pokemon.id }}" {% if pokemon.id == pokemon_list_id.2 %} selected {% endif %}>{{ pokemon.name }}</option>
-            {% endfor %}
-        </select><br><br>
-        <label for="pokemon_4">Pokémon 4 :</label>
-        <select id="pokemon_4" name="pokemon_4" required>
-            {% for pokemon in pokemons %}
-                <option value="{{ pokemon.id }}" {% if pokemon.id == pokemon_list_id.3 %} selected {% endif %}>{{ pokemon.name }}</option>
-            {% endfor %}
-        </select><br><br>
-        <label for="pokemon_5">Pokémon 5 :</label>
-        <select id="pokemon_5" name="pokemon_5" required>
-            {% for pokemon in pokemons %}
-                <option value="{{ pokemon.id }}" {% if pokemon.id == pokemon_list_id.4 %} selected {% endif %}>{{ pokemon.name }}</option>
-            {% endfor %}
-        </select><br><br>
-        <label for="pokemon_6">Pokémon 6 :</label>
-        <select id="pokemon_6" name="pokemon_6" required>
-            {% for pokemon in pokemons %}
-                <option value="{{ pokemon.id }}" {% if pokemon.id == pokemon_list_id.5 %} selected {% endif %}>{{ pokemon.name }}</option>
-            {% endfor %}
-        </select><br><br>
 
-        <input type="submit" value="Sauvegarder">
-        <input type="reset" value="Réinitialiser">
-        <a href="{% url 'team_list' %}">Retour à la liste des équipes</a>
+        <div class="mb-4">
+            <label for="team_name" class="block text-sm font-medium text-gray-600">Nom de l'équipe :</label>
+            <input type="text" id="team_name" name="team_name" required placeholder="Nom de l'équipe" value="{{ team_name }}" class="mt-1 p-2 w-full border rounded-md">
+        </div>
+
+            <div class="mb-4">
+                <label for="pokemon_1" class="block text-sm font-medium text-gray-600">Pokémon 1 :</label>
+                <select id="pokemon_1" name="pokemon_1" required class="mt-1 p-2 w-full border rounded-md">
+                    {% for pokemon in pokemons %}
+                    <option value="{{ pokemon.id }}" {% if pokemon.id == pokemon_list_id.0 %} selected {% endif %}>{{ pokemon.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="pokemon_2" class="block text-sm font-medium text-gray-600">Pokémon 2 :</label>
+                <select id="pokemon_2" name="pokemon_2" required class="mt-1 p-2 w-full border rounded-md">
+                    {% for pokemon in pokemons %}
+                    <option value="{{ pokemon.id }}" {% if pokemon.id == pokemon_list_id.1 %} selected {% endif %}>{{ pokemon.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="pokemon_3" class="block text-sm font-medium text-gray-600">Pokémon 3 :</label>
+                <select id="pokemon_3" name="pokemon_3" required class="mt-1 p-2 w-full border rounded-md">
+                    {% for pokemon in pokemons %}
+                    <option value="{{ pokemon.id }}" {% if pokemon.id == pokemon_list_id.2 %} selected {% endif %}>{{ pokemon.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="pokemon_4" class="block text-sm font-medium text-gray-600">Pokémon 4 :</label>
+                <select id="pokemon_4" name="pokemon_4" required class="mt-1 p-2 w-full border rounded-md">
+                    {% for pokemon in pokemons %}
+                    <option value="{{ pokemon.id }}" {% if pokemon.id == pokemon_list_id.3 %} selected {% endif %}>{{ pokemon.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="pokemon_5" class="block text-sm font-medium text-gray-600">Pokémon 5 :</label>
+                <select id="pokemon_5" name="pokemon_5" required class="mt-1 p-2 w-full border rounded-md">
+                    {% for pokemon in pokemons %}
+                    <option value="{{ pokemon.id }}" {% if pokemon.id == pokemon_list_id.4 %} selected {% endif %}>{{ pokemon.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="pokemon_6" class="block text-sm font-medium text-gray-600">Pokémon 6 :</label>
+                <select id="pokemon_6" name="pokemon_6" required class="mt-1 p-2 w-full border rounded-md">
+                    {% for pokemon in pokemons %}
+                    <option value="{{ pokemon.id }}" {% if pokemon.id == pokemon_list_id.5 %} selected {% endif %}>{{ pokemon.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+        <div class="flex items-center space-x-4">
+            <input type="submit" value="Sauvegarder" class="bg-blue-500 text-white py-2 px-4 rounded cursor-pointer">
+            <input type="reset" value="Réinitialiser" class="bg-gray-300 text-gray-700 py-2 px-4 rounded cursor-pointer">
+            <a href="{% url 'team_list' %}" class="text-blue-500 hover:underline">Retour à la liste des équipes</a>
+        </div>
     </form>
+</div>
+
 {% include 'base/end_html_base.html' %}
