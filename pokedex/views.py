@@ -1,7 +1,5 @@
 from django.core.cache import cache
 import requests
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
 from django.urls import reverse
 from requests.exceptions import RequestException
 from settings import *
@@ -31,12 +29,15 @@ def get_pokemon_info(url):
 
     pokemon_data = fetch_pokemon_data(url)
     pokemon_info = {
+        'id': pokemon_data['id'],
         'name': pokemon_data['name'],
         'types': [t['type']['name'] for t in pokemon_data['types']],
         'abilities': [ability['ability']['name'] for ability in pokemon_data['abilities']],
         'stats': {stat['stat']['name']: stat['base_stat'] for stat in pokemon_data['stats']},
         'moves': [move['move']['name'] for move in pokemon_data['moves']],
-        'image': pokemon_data['sprites']['front_default']
+        'image': pokemon_data['sprites']['front_default'],
+        'height': pokemon_data['height'],
+        'weight': pokemon_data['weight'],
     }
 
     cache.set(url, pokemon_info, timeout=3600)
@@ -142,10 +143,29 @@ def filter_pokemon_by_type(request):
             filtered_pokemon = [pokemon for pokemon in all_pokemon if type_filter.lower() in pokemon['types']]
             return render(request, 'pokedex/index.html', {'pokemon_list': filtered_pokemon, 'query': type_filter})
         else:
-            return HttpResponseRedirect(reverse('get_all_pokemon_data'))  # Redirige vers la liste complète si aucun filtre
+            return HttpResponseRedirect(reverse('get_all_pokemon_data'))
     except Exception as e:
         return render(request, 'pokedex/errors.html', {'error_message': f"Erreur : {e}"})
 
+def get_pokemon_detail(pokemon_id):
+    try:
+        pokemon_detail_url = f"https://pokeapi.co/api/v2/pokemon/{pokemon_id}/"
+        pokemon_detail = cache.get(pokemon_detail_url)
+        if not pokemon_detail:
+            pokemon_data = fetch_pokemon_data(pokemon_detail_url)
+            pokemon_detail = get_pokemon_info(pokemon_data)
+            cache.set(pokemon_detail_url, pokemon_detail, timeout=3600)
+
+        return pokemon_detail
+    except Exception as e:
+        raise e  # Gérez les erreurs selon vos besoins
+
+def pokemon_detail(request, pokemon_id):
+    try:
+        pokemon_detail = get_pokemon_detail(pokemon_id)
+        return render(request, 'pokedex/pokemon_detail.html', {'pokemon_detail': pokemon_detail})
+    except Exception as e:
+        return render(request, 'pokedex/errors.html', {'error_message': f"Erreur : {e}"})
 # login page
 def login_user(request):
     if request.method == "POST":
