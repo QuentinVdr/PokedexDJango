@@ -1,0 +1,21 @@
+{% include 'base/start_html_base.html' with titre="Créer une équipe" navbar="true" %}
+<h1>Liste de mes équipes</h1>
+nombre d'équipe : {{ list_team|length }}
+<a href="{% url 'create_team' %}" >Créer une équipe</a>
+{% for team in list_team %}
+    <ul>
+        <li>{{ team.name }}</li>
+        <li>{{ team.pokemon_1.name }}</li>
+        <li>{{ team.pokemon_2.name }}</li>
+        <li>{{ team.pokemon_3.name }}</li>
+        <li>{{ team.pokemon_4.name }}</li>
+        <li>{{ team.pokemon_5.name }}</li>
+        <li>{{ team.pokemon_6.name }}</li>
+        <form method="POST" action="{% url 'delete_team' team.id %}">
+            {% csrf_token %}
+            <input type="submit" value="Supprimer">
+        </form>
+        <a href="{% url 'update_team' team.id %}">Modifier</a>  
+    </ul>
+{% endfor %}
+{% include 'base/end_html_base.html' %}
