@@ -18,7 +18,9 @@ urlpatterns = [
     path('team/manage/<int:team_id>/', views.update_team, name='update_team'),
     path('team/delete/<int:team_id>/', views.delete_team, name='delete_team'),
     path('fight/history/', views.fight_history, name='fight_history'),
-
+    # error 404
+    path('404/', views.error_404, name='error_404'),
 ]
+
 
 urlpatterns += staticfiles_urlpatterns()

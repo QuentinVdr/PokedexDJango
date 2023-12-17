@@ -387,3 +387,5 @@ def update_team(request, team_id):
         request.session['error'] = 'Vous ne pouvez pas modifier cette équipe'
         return redirect('team_list')
     
+def error_404(request, exception):
+    return render(request, 'pokedex/404.html', status=404)
