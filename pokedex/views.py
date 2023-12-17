@@ -1,3 +1,11 @@
+from django.core.cache import cache
+import requests
+from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from requests.exceptions import RequestException
+from settings import *
+import time
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -6,8 +14,132 @@ from .models import UserProfile, TeamPokemon, Pokemon, Team, Fight
 from django.contrib.auth.decorators import login_required
 import re
 
-def index(request):
-    return render(request, 'index.html')
+
+def fetch_pokemon_data(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.json()
+    except RequestException as e:
+        raise RequestException(f"Erreur lors de la connexion à l'API : {e}")
+
+
+def get_pokemon_info(url):
+    cached_pokemon_info = cache.get(url)
+    if cached_pokemon_info:
+        return cached_pokemon_info
+
+    pokemon_data = fetch_pokemon_data(url)
+    pokemon_info = {
+        'name': pokemon_data['name'],
+        'types': [t['type']['name'] for t in pokemon_data['types']],
+        'abilities': [ability['ability']['name'] for ability in pokemon_data['abilities']],
+        'stats': {stat['stat']['name']: stat['base_stat'] for stat in pokemon_data['stats']},
+        'moves': [move['move']['name'] for move in pokemon_data['moves']],
+        'image': pokemon_data['sprites']['front_default']
+    }
+
+    cache.set(url, pokemon_info, timeout=3600)
+    return pokemon_info
+
+
+def get_pokemon_batch(url):
+    try:
+        data = fetch_pokemon_data(url)
+        pokemon_batch = []
+        for pokemon in data['results']:
+            pokemon_info = get_pokemon_info(pokemon['url'])
+            pokemon_batch.append(pokemon_info)
+
+        return pokemon_batch, data.get('next')
+    except RequestException as e:
+        raise RequestException(f"Erreur lors de la connexion à l'API : {e}")
+
+
+def get_all_pokemon(batch_size=100000):
+    try:
+        all_pokemon = []
+        offset = 0
+
+        while True:
+            gen_url = f"{API_URL}?limit={121}&offset={offset}"
+            data = fetch_pokemon_data(gen_url)
+
+            for pokemon in data['results']:
+                pokemon_info = get_pokemon_info(pokemon['url'])
+                all_pokemon.append(pokemon_info)
+
+            if not data.get('next'):
+                break
+            offset += batch_size * 5
+
+        return all_pokemon
+    except RequestException as e:
+        raise RequestException(f"Erreur lors de la connexion à l'API : {e}")
+
+
+def get_all_pokemon_data(request):
+    try:
+        start_time = time.time()
+
+        cached_pokemon = cache.get('all_pokemon_data')
+
+        if cached_pokemon:
+            return render(request, 'pokedex/index.html', {'pokemon_list': cached_pokemon})
+        else:
+            start_fetch_time = time.time()
+            all_pokemon = get_all_pokemon()
+            end_fetch_time = time.time()
+
+            cache.set('all_pokemon_data', all_pokemon, timeout=3600)
+            end_time = time.time()
+
+            fetch_duration = end_fetch_time - start_fetch_time
+            total_duration = end_time - start_time
+
+            print(f"Temps pour récupérer les données : {fetch_duration} secondes")
+            print(f"Temps total d'exécution : {total_duration} secondes")
+
+            return render(request, 'pokedex/index.html', {'pokemon_list': all_pokemon})
+    except Exception as e:
+        return render(request, 'pokedex/errors.html', {'error_message': f"Erreur : {e}"})
+
+
+def get_filtered_pokemon(query, all_pokemon):
+    return [pokemon for pokemon in all_pokemon if query.lower() in pokemon['name'].lower()]
+
+
+def search_pokemon(request):
+    try:
+        query = request.GET.get('search')
+        all_pokemon = cache.get('all_pokemon_data')
+
+        if query and all_pokemon:
+            cached_results = cache.get(query)
+            if cached_results:
+                filtered_pokemon = cached_results
+            else:
+                filtered_pokemon = get_filtered_pokemon(query, all_pokemon)
+                cache.set(query, filtered_pokemon, timeout=3600)
+
+            return render(request, 'pokedex/index.html', {'pokemon_list': filtered_pokemon, 'query': query})
+        else:
+            return render(request, 'pokedex/index.html', {'pokemon_list': all_pokemon})
+    except Exception as e:
+        return render(request, 'pokedex/errors.html', {'error_message': f"Erreur : {e}"})
+
+def filter_pokemon_by_type(request):
+    try:
+        type_filter = request.GET.get('type')
+        all_pokemon = cache.get('all_pokemon_data')
+
+        if type_filter and all_pokemon:
+            filtered_pokemon = [pokemon for pokemon in all_pokemon if type_filter.lower() in pokemon['types']]
+            return render(request, 'pokedex/index.html', {'pokemon_list': filtered_pokemon, 'query': type_filter})
+        else:
+            return HttpResponseRedirect(reverse('get_all_pokemon_data'))  # Redirige vers la liste complète si aucun filtre
+    except Exception as e:
+        return render(request, 'pokedex/errors.html', {'error_message': f"Erreur : {e}"})
 
 # login page
 def login_user(request):
@@ -32,7 +164,7 @@ def login_user(request):
             return render(request, 'authentification/login.html', {'next': next_url})
         else:
             return render(request, 'authentification/login.html')
-    
+
 # logout page (redirect to login page)
 @login_required(login_url='login', redirect_field_name='')
 def logout_user(request):
@@ -50,7 +182,7 @@ def register_user(request):
         regex_password = r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"
         if not re.match(regex_password, password):
             return render(request, 'authentification/register.html', {'error': 'Le mot de passe doit contenir au moins 8 caractères dont au moins une lettre et un chiffre', 'username': username, 'email': email})
-        
+
         # check if username or email already exist
         if User.objects.filter(username=username).exists():
             return render(request, 'authentification/register.html', {'error': 'Le nom d\'utilisateur existe déjà', 'email': email})
@@ -66,7 +198,7 @@ def register_user(request):
         return redirect('index')
     else:
         return render(request, 'authentification/register.html')
-    
+
 # user pokemon list
 @login_required(login_url='login')
 def user_pokemon_list(request):
@@ -74,7 +206,7 @@ def user_pokemon_list(request):
     userProfil = UserProfile.objects.get(user=user)
     pokemons = userProfil.pokemon_set.all()
     return render(request, 'pokemon/myPokemon.html', {'pokemons': pokemons})
-    
+
 # user create team
 @login_required(login_url='login')
 def new_team(request):
