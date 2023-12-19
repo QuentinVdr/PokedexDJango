@@ -41,7 +41,7 @@
     <ul class="results">
         {% for pokemon in pokemon_list %}
         <li>
-            <div class="pokemon-card" onclick="redirectToDetail('{% url 'detail_pokemon' pokemon.id %}')">
+            <a class="pokemon-card" href="{% url 'detail_pokemon' pokemon.id %}">
                 <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}">
                 <div class="pokemon-info">
                     <p class="id">
@@ -62,11 +62,4 @@
         {% endfor %}
     </ul>
 </section>
-<script>
-    // Fonction pour rediriger vers l'URL de détail du Pokémon
-    function redirectToDetail(url) {
-        // Rediriger vers l'URL de détail du Pokémon
-        window.location.href = url;
-    }
-</script>
 {% include 'base/end_html_base.html' %}

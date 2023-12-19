@@ -32,58 +32,59 @@ def get_all_pokemon():
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         all_pokemon = loop.run_until_complete(get_pokemon_info_async(data["results"]))
-
-        print(f"Nombre de pokemon récupérés : {len(all_pokemon)}")
-        print(f"Nombre de pokemon en cache : {len(cache._cache)}")
-
         return all_pokemon
     except RequestException as e:
         raise RequestException(f"Erreur lors de la connexion à l'API : {e}")
 
 async def get_pokemon_info_async(list_pokemon):
     result = []
-    for pokemon in list_pokemon:
-        if 'url' in pokemon and pokemon['url'] in cache._cache:
-            result.append(cache.get(pokemon['url']))
-            list_pokemon.remove(pokemon)
+    count_in_cache = 0
+    # for pokemon in list_pokemon:
+    #     data_cache = cache.get(pokemon['url'])
+    #     if data_cache:
+    #         result.append(data_cache)
+    #         count_in_cache += 1
+    #         list_pokemon.remove(pokemon)
 
     async with aiohttp.ClientSession() as session:
-        cacheCount = 0
-        notCacheCount = 0
+        pokemon_result = []
         tasks = []
         for pokemon in list_pokemon:
             url = pokemon['url']
             cached_pokemon_info = cache.get(url)
             if cached_pokemon_info:
-                cacheCount += 1
-                tasks.append(cached_pokemon_info)
+                pokemon_result.append(cached_pokemon_info)
             else:
-                notCacheCount += 1
                 tasks.append(get_pokemon_info_async_task(session, pokemon))
-        print(f"Nombre de pokemon en cache : {cacheCount}")
-        print(f"Nombre de pokemon non en cache : {notCacheCount}")
-        print(f"Total : {cacheCount + notCacheCount}")
-        result.extend(await asyncio.gather(*tasks))
-    for pokemon in result:
-        cache.set(pokemon['url'], pokemon, timeout=3600)
-    return result
+        pokemon_result_await = await asyncio.gather(*tasks)
+        for pokemon in pokemon_result_await:
+            cache.set(pokemon['url'], pokemon, timeout=3600)
+            pokemon_result.append(pokemon)
+    return pokemon_result
     
 async def get_pokemon_info_async_task(session, pokemon):
     async with session.get(pokemon['url']) as response:
         data = await response.json()
-        pokemon_info = {
-            'url': pokemon['url'],
-            'id': data['id'],
-            'name': data['name'],
-            'types': [t['type']['name'] for t in data['types']],
-            'abilities': [ability['ability']['name'] for ability in data['abilities']],
-            'stats': {stat['stat']['name']: stat['base_stat'] for stat in data['stats']},
-            'moves': [move['move']['name'] for move in data['moves']],
-            'image': data['sprites']['front_default'],
-            'height': data['height'],
-            'weight': data['weight'],
-        }
+        pokemon_info = transform_pokemon_info_json(data, pokemon['url'])
         return pokemon_info
+    
+def transform_pokemon_info_json(pokemon_info, url):
+    pokemon_info_transform = {
+            'url': url,
+            'id': pokemon_info['id'],
+            'name': pokemon_info['name'],
+            'types': [t['type']['name'] for t in pokemon_info['types']],
+            'abilities': [ability['ability']['name'] for ability in pokemon_info['abilities']],
+            'stats': {stat['stat']['name']: stat['base_stat'] for stat in pokemon_info['stats']},
+            'moves': [move['move']['name'] for move in pokemon_info['moves']],
+            'image': pokemon_info['sprites']['front_default'],
+            'height': pokemon_info['height'],
+            'weight': pokemon_info['weight'],
+        }
+    if pokemon_info_transform['image'] is None:
+        pokemon_info_transform['image'] = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'
+    return pokemon_info_transform
+
 
 def get_all_pokemon_data(request):
     try:
@@ -167,7 +168,7 @@ def get_pokemon_detail(pokemon_id):
         pokemon_detail = cache.get(pokemon_detail_url)
         if not pokemon_detail:
             pokemon_data = fetch_pokemon_data(pokemon_detail_url)
-            pokemon_detail = get_pokemon_info(pokemon_data)
+            pokemon_detail = transform_pokemon_info_json(pokemon_data, pokemon_detail_url)
             cache.set(pokemon_detail_url, pokemon_detail, timeout=3600)
 
         return pokemon_detail
