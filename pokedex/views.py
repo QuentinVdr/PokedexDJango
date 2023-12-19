@@ -13,6 +13,8 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from .models import UserProfile, TeamPokemon, Pokemon, Team, Fight
 from django.contrib.auth.decorators import login_required
 import re
+import aiohttp
+import asyncio
 
 
 def fetch_pokemon_data(url):
@@ -23,60 +25,64 @@ def fetch_pokemon_data(url):
     except RequestException as e:
         raise RequestException(f"Erreur lors de la connexion à l'API : {e}")
 
-
-def get_pokemon_info(url):
-    cached_pokemon_info = cache.get(url)
-    if cached_pokemon_info:
-        return cached_pokemon_info
-
-    pokemon_data = fetch_pokemon_data(url)
-    pokemon_info = {
-        'name': pokemon_data['name'],
-        'types': [t['type']['name'] for t in pokemon_data['types']],
-        'abilities': [ability['ability']['name'] for ability in pokemon_data['abilities']],
-        'stats': {stat['stat']['name']: stat['base_stat'] for stat in pokemon_data['stats']},
-        'moves': [move['move']['name'] for move in pokemon_data['moves']],
-        'image': pokemon_data['sprites']['front_default']
-    }
-
-    cache.set(url, pokemon_info, timeout=3600)
-    return pokemon_info
-
-
-def get_pokemon_batch(url):
-    try:
-        data = fetch_pokemon_data(url)
-        pokemon_batch = []
-        for pokemon in data['results']:
-            pokemon_info = get_pokemon_info(pokemon['url'])
-            pokemon_batch.append(pokemon_info)
-
-        return pokemon_batch, data.get('next')
-    except RequestException as e:
-        raise RequestException(f"Erreur lors de la connexion à l'API : {e}")
-
-
-def get_all_pokemon(batch_size=100000):
+def get_all_pokemon():
     try:
         all_pokemon = []
-        offset = 0
+        gen_url = f"{API_URL}?limit={10000}"
+        data = fetch_pokemon_data(gen_url)
+        # async
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        all_pokemon = loop.run_until_complete(get_pokemon_info_async(data["results"]))
 
-        while True:
-            gen_url = f"{API_URL}?limit={121}&offset={offset}"
-            data = fetch_pokemon_data(gen_url)
-
-            for pokemon in data['results']:
-                pokemon_info = get_pokemon_info(pokemon['url'])
-                all_pokemon.append(pokemon_info)
-
-            if not data.get('next'):
-                break
-            offset += batch_size * 5
+        print(f"Nombre de pokemon récupérés : {len(all_pokemon)}")
+        print(f"Nombre de pokemon en cache : {len(cache._cache)}")
 
         return all_pokemon
     except RequestException as e:
         raise RequestException(f"Erreur lors de la connexion à l'API : {e}")
 
+async def get_pokemon_info_async(list_pokemon):
+    result = []
+    for pokemon in list_pokemon:
+        if 'url' in pokemon and pokemon['url'] in cache._cache:
+            result.append(cache.get(pokemon['url']))
+            list_pokemon.remove(pokemon)
+
+    async with aiohttp.ClientSession() as session:
+        cacheCount = 0
+        notCacheCount = 0
+        tasks = []
+        for pokemon in list_pokemon:
+            url = pokemon['url']
+            cached_pokemon_info = cache.get(url)
+            if cached_pokemon_info:
+                cacheCount += 1
+                tasks.append(cached_pokemon_info)
+            else:
+                notCacheCount += 1
+                tasks.append(get_pokemon_info_async_task(session, pokemon))
+        print(f"Nombre de pokemon en cache : {cacheCount}")
+        print(f"Nombre de pokemon non en cache : {notCacheCount}")
+        print(f"Total : {cacheCount + notCacheCount}")
+        result.extend(await asyncio.gather(*tasks))
+    for pokemon in result:
+        cache.set(pokemon['url'], pokemon, timeout=3600)
+    return result
+    
+async def get_pokemon_info_async_task(session, pokemon):
+    async with session.get(pokemon['url']) as response:
+        data = await response.json()
+        pokemon_info = {
+            'url': pokemon['url'],
+            'name': data['name'],
+            'types': [t['type']['name'] for t in data['types']],
+            'abilities': [ability['ability']['name'] for ability in data['abilities']],
+            'stats': {stat['stat']['name']: stat['base_stat'] for stat in data['stats']},
+            'moves': [move['move']['name'] for move in data['moves']],
+            'image': data['sprites']['front_default']
+        }
+        return pokemon_info
 
 def get_all_pokemon_data(request):
     try:
@@ -85,6 +91,7 @@ def get_all_pokemon_data(request):
         cached_pokemon = cache.get('all_pokemon_data')
 
         if cached_pokemon:
+            print("Données récupérées depuis le cache")
             return render(request, 'pokedex/index.html', {'pokemon_list': cached_pokemon})
         else:
             start_fetch_time = time.time()
@@ -115,6 +122,10 @@ def search_pokemon(request):
         if query is None:
             return redirect('index')
         all_pokemon = cache.get('all_pokemon_data')
+        if all_pokemon is None:
+            all_pokemon = get_all_pokemon()
+            cache.set('all_pokemon_data', all_pokemon, timeout=3600)
+
 
         if query and all_pokemon:
             cached_results = cache.get(query)
@@ -137,6 +148,9 @@ def filter_pokemon_by_type(request):
         if type_filter is None:
             return redirect('index')
         all_pokemon = cache.get('all_pokemon_data')
+        if all_pokemon is None:
+            all_pokemon = get_all_pokemon()
+            cache.set('all_pokemon_data', all_pokemon, timeout=3600)
 
         if type_filter and all_pokemon:
             filtered_pokemon = [pokemon for pokemon in all_pokemon if type_filter.lower() in pokemon['types']]
