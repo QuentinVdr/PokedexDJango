@@ -211,8 +211,9 @@ def register_user(request):
         user = User.objects.create_user(username, email, password)
         user.save()
         # create user profile
-        userProfil = UserProfile(user=user)
-        userProfil.save()
+        user_profil = UserProfile(user=user)
+        user_profil.money = 500
+        user_profil.save()
         login(request, user)
         # redirect to route name "index"
         return redirect('index')
