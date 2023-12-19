@@ -1,46 +1,72 @@
 {% include 'base/start_html_base.html' with titre="Liste de mes Pokémons" navbar="true" %}
 <div class="navigation-bar">
-    <div class="filter-bar">
-        <form method="GET" action="{% url 'filter_pokemon_by_type' %}">
-            <select name="type">
-                <option value="" selected disabled hidden>Filtrer par type</option>
-                <option value="normal">Normal</option>
-                <option value="fire">Feu</option>
-                <!-- Ajoute ici d'autres options pour chaque type -->
-            </select>
-            <button type="submit">Filtrer</button>
-        </form>
-    </div>
-    <div class="search-bar">
-        <form method="GET" action="{% url 'search_pokemon' %}">
-            <input type="text" name="search" placeholder="Rechercher un Pokémon par nom">
-            <button type="submit">Rechercher</button>
-            <button type="submit" class="back-button">Retour</button>
-        </form>
-    </div>
-</div>
-
-<div class="card-container">
-    {% for pokemon in pokemon_list %}
-        <div class="card">
-            <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}">
-            <div class="card-details">
-                <h3>{{ pokemon.name }}</h3>
-                <p>Type(s): {{ pokemon.types | join:", " }}</p>
-                <p>Capacité(s): {{ pokemon.abilities | join:", " }}</p>
-                <p>Stats:
-                    <table class="center">
-                        {% for stat, value in pokemon.stats.items %}
-                            <tr>
-                                <td>{{ stat }}</td>
-                                <td>{{ value }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </p>
-                <p>Mouvements: {{ pokemon.moves | join:", " }}</p>
-            </div>
+    <div class="search-filter-container">
+        <div class="search-bar">
+            <form method="GET" action="{% url 'search_pokemon' %}">
+                <input type="text" name="search" placeholder="Rechercher un Pokémon">
+                <button type="submit">Rechercher</button>
+                <button type="submit">Tous</button>
+            </form>
         </div>
-    {% endfor %}
+        <div class="filter-bar">
+            <form method="GET" action="{% url 'filter_pokemon_by_type' %}">
+                <select name="type">
+                    <option value="" selected disabled hidden>Filtrer par type</option>
+                    <option value="normal">Normal</option>
+                    <option value="fire">Feu</option>
+                    <option value="water">Eau</option>
+                    <option value="electric">Electrique</option>
+                    <option value="grass">Plante</option>
+                    <option value="ice">Glace</option>
+                    <option value="fighting">Combat</option>
+                    <option value="poison">Poison</option>
+                    <option value="ground">Sol</option>
+                    <option value="flying">Vol</option>
+                    <option value="psychic">Psy</option>
+                    <option value="bug">Insecte</option>
+                    <option value="rock">Roche</option>
+                    <option value="ghost">Spectre</option>
+                    <option value="dragon">Dragon</option>
+                    <option value="dark">Ténèbres</option>
+                    <option value="steel">Acier</option>
+                    <option value="fairy">Fée</option>
+
+                </select>
+                <button type="submit">Filtrer</button>
+            </form>
+        </div>
+    </div>
 </div>
+<section class="section pokedex-results">
+    <ul class="results">
+        {% for pokemon in pokemon_list %}
+        <li>
+            <div class="pokemon-card" onclick="redirectToDetail('{% url 'detail_pokemon' pokemon.id %}')">
+                <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}">
+                <div class="pokemon-info">
+                    <p class="id">
+                        <span class="number-prefix">N°{{ pokemon.id }}</span>
+                    </p>
+                    <h5>{{ pokemon.name }}</h5>
+                    <div class="types">
+                        {% for type in pokemon.types %}
+                            <span class="type type-{{ type|lower }}">{{ type }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+                <div class="pokemon-actions">
+                    <a class="btn btn-secondary">Acheter</a>
+                </div>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+<script>
+    // Fonction pour rediriger vers l'URL de détail du Pokémon
+    function redirectToDetail(url) {
+        // Rediriger vers l'URL de détail du Pokémon
+        window.location.href = url;
+    }
+</script>
 {% include 'base/end_html_base.html' %}

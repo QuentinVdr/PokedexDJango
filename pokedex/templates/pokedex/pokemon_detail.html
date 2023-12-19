@@ -1,0 +1,53 @@
+{% include 'base/start_html_base.html' with titre="Liste de mes Pokémons" navbar="true" %}
+    <div class="pokemon-details">
+        <h1>{{ pokemon_detail.name }} - Détails du Pokémon</h1>
+
+        <div class="pokemon-image">
+            <img src="{{ pokemon_detail.image }}" alt="{{ pokemon_detail.name }}">
+        </div>
+
+        <div class="pokemon-info">
+            <p>ID: {{ pokemon_detail.id }}</p>
+            <p>Taille: {{ pokemon_detail.height }} cm</p>
+            <p>Poids: {{ pokemon_detail.weight }} g</p>
+        </div>
+
+        <div class="pokemon-types">
+            <h2>Types:</h2>
+            <ul>
+                {% for type in pokemon_detail.types %}
+                    <li>{{ type }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="pokemon-stats">
+            <h2>Stats:</h2>
+            <ul>
+                {% for stat, value in pokemon_detail.stats.items %}
+                    <li>{{ stat }}: {{ value }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="pokemon-abilities">
+            <h2>Abilities:</h2>
+            <ul>
+                {% for ability in pokemon_detail.abilities %}
+                    <li>{{ ability }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="pokemon-moves">
+            <h2>Moves:</h2>
+            <ul>
+                {% for move in pokemon_detail.moves %}
+                    <li>{{ move }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <!-- Ajoutez d'autres détails du Pokémon ici si nécessaire -->
+    </div>
+
+{% include 'base/end_html_base.html' %}
