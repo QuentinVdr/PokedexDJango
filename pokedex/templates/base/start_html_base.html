@@ -21,6 +21,8 @@
             </div>
             {% if user.is_authenticated %}
                 <div class="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+                    <!--user money-->
+                    <span class="text-sm text-gray-300">{{ money }} <img class="inline w-6 h-6 me-3" src="https://static.wikia.nocookie.net/pokemongohelp/images/9/99/Pokecoin1.png/revision/latest?cb=20160923165335" alt="pokecoin"></span>
                     <button type="button" class="flex text-sm bg-gray-800 rounded-full md:me-0" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
                         <img class="w-8 h-8 rounded-full" src="/static/img/user.png" alt="user photo">
                     </button>

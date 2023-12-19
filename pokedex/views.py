@@ -37,15 +37,6 @@ def get_all_pokemon():
         raise RequestException(f"Erreur lors de la connexion à l'API : {e}")
 
 async def get_pokemon_info_async(list_pokemon):
-    result = []
-    count_in_cache = 0
-    # for pokemon in list_pokemon:
-    #     data_cache = cache.get(pokemon['url'])
-    #     if data_cache:
-    #         result.append(data_cache)
-    #         count_in_cache += 1
-    #         list_pokemon.remove(pokemon)
-
     async with aiohttp.ClientSession() as session:
         pokemon_result = []
         tasks = []
@@ -79,8 +70,15 @@ def transform_pokemon_info_json(pokemon_info, url):
             'moves': [move['move']['name'] for move in pokemon_info['moves']],
             'image': pokemon_info['sprites']['front_default'],
             'height': pokemon_info['height'],
-            'weight': pokemon_info['weight'],
+            'weight': pokemon_info['weight']
         }
+    price = 0
+    # calcul price (average of stats)
+    for stat in pokemon_info_transform['stats']:
+        price += pokemon_info_transform['stats'][stat]
+    price = price / len(pokemon_info_transform['stats'])
+    price = round(price)
+    pokemon_info_transform['price'] = price
     if pokemon_info_transform['image'] is None:
         pokemon_info_transform['image'] = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'
     return pokemon_info_transform
@@ -91,16 +89,35 @@ def get_all_pokemon_data(request):
         start_time = time.time()
 
         cached_pokemon = cache.get('all_pokemon_data')
-
+        all_pokemon = []
+        query = ""
         if cached_pokemon:
             print("Données récupérées depuis le cache")
-            return render(request, 'pokedex/index.html', {'pokemon_list': cached_pokemon})
+            all_pokemon = cached_pokemon
+            query = request.GET.get('search')
+            if query:
+                all_pokemon = get_filtered_pokemon(query, all_pokemon)
+
+            # get the type filter
+            type_filter = request.GET.get('type')
+            if type_filter:
+                all_pokemon = [pokemon for pokemon in all_pokemon if type_filter.lower() in pokemon['types']]
         else:
             start_fetch_time = time.time()
             all_pokemon = get_all_pokemon()
+            cache.set('all_pokemon_data', all_pokemon, timeout=3600)
+            # get the search query
+            query = request.GET.get('search')
+            if query:
+                all_pokemon = get_filtered_pokemon(query, all_pokemon)
+
+            # get the type filter
+            type_filter = request.GET.get('type')
+            if type_filter:
+                all_pokemon = [pokemon for pokemon in all_pokemon if type_filter.lower() in pokemon['types']]
+                
             end_fetch_time = time.time()
 
-            cache.set('all_pokemon_data', all_pokemon, timeout=3600)
             end_time = time.time()
 
             fetch_duration = end_fetch_time - start_fetch_time
@@ -108,59 +125,21 @@ def get_all_pokemon_data(request):
 
             print(f"Temps pour récupérer les données : {fetch_duration} secondes")
             print(f"Temps total d'exécution : {total_duration} secondes")
-
-            return render(request, 'pokedex/index.html', {'pokemon_list': all_pokemon})
+        if query == None:
+            query = ""
+        user = request.user
+        userProfil = UserProfile.objects.get(user=user)
+        pokemon_user = Pokemon.objects.filter(user=userProfil)
+        pokemon_id_api = [pokemon.pokemon_api_id for pokemon in pokemon_user]
+        return render(request, 'pokedex/index.html', {'pokemon_list': all_pokemon, 'pokemon_user': pokemon_id_api, 'search': query})
     except Exception as e:
-        return render(request, 'pokedex/errors.html', {'error_message': f"Erreur : {e}"})
+        request.session['error'] = f"Erreur : {e}"
+        return render(request, 'pokedex/index.html')
 
 
 def get_filtered_pokemon(query, all_pokemon):
     return [pokemon for pokemon in all_pokemon if query.lower() in pokemon['name'].lower()]
 
-
-def search_pokemon(request):
-    try:
-        query = request.GET.get('search')
-        if query is None:
-            return redirect('index')
-        all_pokemon = cache.get('all_pokemon_data')
-        if all_pokemon is None:
-            all_pokemon = get_all_pokemon()
-            cache.set('all_pokemon_data', all_pokemon, timeout=3600)
-
-
-        if query and all_pokemon:
-            cached_results = cache.get(query)
-            if cached_results:
-                filtered_pokemon = cached_results
-            else:
-                filtered_pokemon = get_filtered_pokemon(query, all_pokemon)
-                cache.set(query, filtered_pokemon, timeout=3600)
-
-            return render(request, 'pokedex/index.html', {'pokemon_list': filtered_pokemon, 'query': query})
-        else:
-            return render(request, 'pokedex/index.html', {'pokemon_list': all_pokemon})
-    except Exception as e:
-        return render(request, 'pokedex/errors.html', {'error_message': f"Erreur : {e}"})
-
-def filter_pokemon_by_type(request):
-    try:
-        type_filter = request.GET.get('type')
-        print(type_filter)
-        if type_filter is None:
-            return redirect('index')
-        all_pokemon = cache.get('all_pokemon_data')
-        if all_pokemon is None:
-            all_pokemon = get_all_pokemon()
-            cache.set('all_pokemon_data', all_pokemon, timeout=3600)
-
-        if type_filter and all_pokemon:
-            filtered_pokemon = [pokemon for pokemon in all_pokemon if type_filter.lower() in pokemon['types']]
-            return render(request, 'pokedex/index.html', {'pokemon_list': filtered_pokemon, 'query': type_filter})
-        else:
-            return HttpResponseRedirect(reverse('get_all_pokemon_data'))
-    except Exception as e:
-        return render(request, 'pokedex/errors.html', {'error_message': f"Erreur : {e}"})
 
 def get_pokemon_detail(pokemon_id):
     try:
@@ -180,7 +159,8 @@ def pokemon_detail(request, pokemon_id):
         pokemon_detail = get_pokemon_detail(pokemon_id)
         return render(request, 'pokedex/pokemon_detail.html', {'pokemon_detail': pokemon_detail})
     except Exception as e:
-        return render(request, 'pokedex/errors.html', {'error_message': f"Erreur : {e}"})
+        request.session['error'] = f"Erreur : {e}"
+        return redirect('index')
 # login page
 def login_user(request):
     if request.method == "POST":
@@ -245,7 +225,28 @@ def user_pokemon_list(request):
     user = request.user
     userProfil = UserProfile.objects.get(user=user)
     pokemons = userProfil.pokemon_set.all()
-    return render(request, 'pokemon/myPokemon.html', {'pokemons': pokemons})
+    pokemon_api_id = [pokemon.pokemon_api_id for pokemon in pokemons]
+
+    data_url = [{"url": "https://pokeapi.co/api/v2/pokemon/"+str(pokemon.pokemon_api_id)} for pokemon in pokemons]
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    all_pokemon = loop.run_until_complete(get_pokemon_info_async(data_url))
+
+    # get the search query
+    query = request.GET.get('search')
+    if query:
+        all_pokemon = get_filtered_pokemon(query, all_pokemon)
+    if query == None:
+        query = ""
+    
+    # get the type filter
+    type_filter = request.GET.get('type')
+    if type_filter:
+        all_pokemon = [pokemon for pokemon in all_pokemon if type_filter.lower() in pokemon['types']]
+        
+
+    return render(request, 'pokedex/index.html', {'pokemon_list': all_pokemon ,'disable_buy': True, 'search': query})
 
 # user create team
 @login_required(login_url='login')
@@ -414,8 +415,8 @@ def update_team(request, team_id):
             for pokemon_id in pokemon_list_id:
                 # add pokemon to team
                 pokemon = Pokemon.objects.get(id=pokemon_id)
-                teamPokemon = TeamPokemon(team=team, pokemon=pokemon, order=index)
-                teamPokemon.save()
+                team_pokemon = TeamPokemon(team=team, pokemon=pokemon, order=index)
+                team_pokemon.save()
                 index += 1
             return redirect('team_list')
         else:
@@ -432,3 +433,36 @@ def error_404(request, exception):
 
 def error_404_page(request):
     return render(request, 'pokedex/404.html', status=404)
+
+
+@login_required(login_url='login')
+def buy_pokemon(request):
+    if request.method == "POST":
+        pokemon_id = request.POST['pokemon_id']
+        user = request.user
+        user_profil = UserProfile.objects.get(user=user)
+        # vérifier si l'utilisateur possède déjà ce pokemon (à partir de la propriété pokemon_api_id)
+        list_pokemon_user = Pokemon.objects.filter(user=user_profil)
+        pokemon_user = list_pokemon_user.filter(pokemon_api_id=pokemon_id)
+        if pokemon_user:
+            request.session['error'] = 'Vous possédez déjà ce pokemon'
+            return redirect('index')
+        pokemon_info = get_pokemon_detail(pokemon_id)
+        if pokemon_info:
+            if user_profil.money >= pokemon_info['price']:
+                user_profil.money -= pokemon_info['price']
+                pokemon = Pokemon(pokemon_api_id=pokemon_id)
+                # add pokemon to user
+                pokemon.user = user_profil
+                pokemon.name = pokemon_info['name']
+                pokemon.save()
+                user_profil.save()
+                return redirect('index')
+            else:
+                request.session['error'] = 'Vous n\'avez pas assez d\'argent'
+                return redirect('index')
+        else:
+            request.session['error'] = 'Erreur lors de l\'achat'
+            return redirect('index')
+    else:
+        return redirect('index')

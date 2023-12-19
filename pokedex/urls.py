@@ -7,8 +7,6 @@ from pokedex import views
 
 urlpatterns = [
    path('', views.get_all_pokemon_data, name='index'),
-   path('search/', views.search_pokemon, name='search_pokemon'),
-   path('filter/', views.filter_pokemon_by_type, name='filter_pokemon_by_type'),
    path('login/', views.login_user, name='login'),
    path('logout/', views.logout_user, name='logout'),
    path('register/', views.register_user, name='register'),
@@ -19,7 +17,7 @@ urlpatterns = [
    path('team/delete/<int:team_id>/', views.delete_team, name='delete_team'),
    path('fight/history/', views.fight_history, name='fight_history'),
    path('pokemon/detail/<int:pokemon_id>/', views.pokemon_detail, name='detail_pokemon'),
-
+   path('pokemon/buy/', views.buy_pokemon, name='buy_pokemon'),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

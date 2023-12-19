@@ -1,40 +1,37 @@
 {% include 'base/start_html_base.html' with titre="Liste de mes Pokémons" navbar="true" %}
 <div class="navigation-bar">
     <div class="search-filter-container">
-        <div class="search-bar">
-            <form method="GET" action="{% url 'search_pokemon' %}">
-                <input type="text" name="search" placeholder="Rechercher un Pokémon">
-                <button type="submit">Rechercher</button>
-                <button type="submit">Tous</button>
-            </form>
-        </div>
-        <div class="filter-bar">
-            <form method="GET" action="{% url 'filter_pokemon_by_type' %}">
-                <select name="type">
-                    <option value="" selected disabled hidden>Filtrer par type</option>
-                    <option value="normal">Normal</option>
-                    <option value="fire">Feu</option>
-                    <option value="water">Eau</option>
-                    <option value="electric">Electrique</option>
-                    <option value="grass">Plante</option>
-                    <option value="ice">Glace</option>
-                    <option value="fighting">Combat</option>
-                    <option value="poison">Poison</option>
-                    <option value="ground">Sol</option>
-                    <option value="flying">Vol</option>
-                    <option value="psychic">Psy</option>
-                    <option value="bug">Insecte</option>
-                    <option value="rock">Roche</option>
-                    <option value="ghost">Spectre</option>
-                    <option value="dragon">Dragon</option>
-                    <option value="dark">Ténèbres</option>
-                    <option value="steel">Acier</option>
-                    <option value="fairy">Fée</option>
+        <form method="GET">
+            
+            <div class="search-bar">
+                    <input type="text" name="search" placeholder="Rechercher un Pokémon" value="{{ search }}" class="w-full px-4 py-2 rounded-md border-gray-300 outline-none ring-2 ring-blue-500 border-blue-500">
+                    <div class="filter-bar">
+                            <select name="type">
+                                <option value="" selected disabled hidden>Filtrer par type</option>
+                                <option value="normal">Normal</option>
+                                <option value="fire">Feu</option>
+                                <option value="water">Eau</option>
+                                <option value="electric">Electrique</option>
+                                <option value="grass">Plante</option>
+                                <option value="ice">Glace</option>
+                                <option value="fighting">Combat</option>
+                                <option value="poison">Poison</option>
+                                <option value="ground">Sol</option>
+                                <option value="flying">Vol</option>
+                                <option value="psychic">Psy</option>
+                                <option value="bug">Insecte</option>
+                                <option value="rock">Roche</option>
+                                <option value="ghost">Spectre</option>
+                                <option value="dragon">Dragon</option>
+                                <option value="dark">Ténèbres</option>
+                                <option value="steel">Acier</option>
+                                <option value="fairy">Fée</option>
 
-                </select>
-                <button type="submit">Filtrer</button>
-            </form>
-        </div>
+                            </select>
+                            <button type="submit">Rechercher</button>
+                    </div>
+            </div>
+        </form>
     </div>
 </div>
 <section class="section pokedex-results">
@@ -42,7 +39,7 @@
         {% for pokemon in pokemon_list %}
         <li>
             <a class="pokemon-card" href="{% url 'detail_pokemon' pokemon.id %}">
-                <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}">
+                <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}" class="pokemon-image-card">
                 <div class="pokemon-info">
                     <p class="id">
                         <span class="number-prefix">N°{{ pokemon.id }}</span>
@@ -54,12 +51,39 @@
                         {% endfor %}
                     </div>
                 </div>
-            </div>
+            </a>
+            
+            {% if user.is_authenticated and not disable_buy %}
+                
                 <div class="pokemon-actions">
-                    <a class="btn btn-secondary">Acheter</a>
+                    {% if pokemon.id in pokemon_user %}
+                        <button class="btn btn-primary disabled" disabled>Déjà acheté</button>
+                    {% else %}
+                        <button class="btn btn-primary" onClick="buyPokemon({{ pokemon.id }})">Acheter ({{ pokemon.price }} <img src="https://static.wikia.nocookie.net/pokemongohelp/images/9/99/Pokecoin1.png/revision/latest?cb=20160923165335" alt="pokecoin" class="inline w-4 h-4">)
+                        </button>
+                    {% endif %}
                 </div>
+            {% endif %}
         </li>
         {% endfor %}
     </ul>
+    {% if not disable_buy %}
+    <form id="buy_pokemon_form" action="{% url 'buy_pokemon'%}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="pokemon_id" value="">
+    </form>
+    <script>
+        const form = document.getElementById('buy_pokemon_form');
+        const pokemonBuyInput = form.querySelector('input[name="pokemon_id"]');
+
+        function buyPokemon(pokemonId) {
+            pokemonBuyInput.value = pokemonId;
+            form.submit();
+        }
+    </script>
+    {% endif %}
+
+    
 </section>
+
 {% include 'base/end_html_base.html' %}
