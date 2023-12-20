@@ -430,39 +430,49 @@ ul li {
     color: white;
 }
 
-.arrow-container {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 100%;
-    display: flex;
+.boutton-container {
+    display: block;
     justify-content: space-between;
 }
 
-.arrow {
-    display: block;
-    width: 40px;
-    height: 40px;
-    font-size: 30px;
-    line-height: 40px;
-    text-align: center;
-    color: #fff;
-    background-color: #333;
+.prev-button {
+    padding: 8px 16px;
+    margin: 5px;
+    display: inline-block;
+    border: 1px solid #6c757d;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #6c757d;
     text-decoration: none;
-    border-radius: 50%;
-    transition: background-color 0.3s ease;
+    text-align: center;
+    font-size: 16px;
+    max-width: 200px;
+    cursor: pointer;
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
-.arrow:hover {
-    background-color: #555;
+.next-button {
+    padding: 8px 16px;
+    margin: 5px;
+    display: inline-block;
+    border: 1px solid #6c757d;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #6c757d;
+    text-decoration: none;
+    text-align: center;
+    font-size: 16px;
+    max-width: 200px;
+    cursor: pointer;
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
-.arrow-left {
-    margin-left: 10px;
+.prev-button:hover {
+    color: #fff;
+    background-color: #6c757d;
 }
 
-.arrow-right {
-    position: fixed;
-    margin-right: 10px;
-    right: 10px;
+.next-button:hover {
+    color: #fff;
+    background-color: #6c757d;
 }

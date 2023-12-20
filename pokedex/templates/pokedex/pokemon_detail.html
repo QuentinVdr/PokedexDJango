@@ -57,15 +57,15 @@
                 {% endfor %}
             </ul>
         </div>
+        <div class="boutton-container">
+            {% if prev_pokemon_id %}
+                <a href="{% url 'detail_pokemon' pokemon_id=prev_pokemon_id %}" class="pokemon-nav-button prev-button">Pokémon Précédent</a>
+            {% endif %}
+            {% if next_pokemon_id %}
+                <a href="{% url 'detail_pokemon' pokemon_id=next_pokemon_id %}" class="pokemon-nav-button next-button">Pokémon Suivant</a>
+            {% endif %}
+        </div>
     </div>
 
-<div class="arrow-container">
-    {% if prev_pokemon_id %}
-        <a href="{% url 'detail_pokemon' pokemon_id=prev_pokemon_id %}" class="arrow arrow-left">&lt;</a>
-    {% endif %}
-    {% if next_pokemon_id %}
-        <a href="{% url 'detail_pokemon' pokemon_id=next_pokemon_id %}" class="arrow arrow-right">&gt;</a>
-    {% endif %}
-</div>
 
 {% include 'base/end_html_base.html' %}
