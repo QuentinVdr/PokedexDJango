@@ -18,6 +18,8 @@ urlpatterns = [
    path('fight/history/', views.fight_history, name='fight_history'),
    path('pokemon/detail/<int:pokemon_id>/', views.pokemon_detail, name='detail_pokemon'),
    path('pokemon/buy/', views.buy_pokemon, name='buy_pokemon'),
+   path('pokemon/detail/prev/<int:pokemon_id>/', views.pokemon_detail, name='prev_pokemon_detail'),
+   path('pokemon/detail/next/<int:pokemon_id>/', views.pokemon_detail, name='next_pokemon_detail'),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

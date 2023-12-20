@@ -429,3 +429,40 @@ ul li {
     border-radius: 8px;
     color: white;
 }
+
+.arrow-container {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.arrow {
+    display: block;
+    width: 40px;
+    height: 40px;
+    font-size: 30px;
+    line-height: 40px;
+    text-align: center;
+    color: #fff;
+    background-color: #333;
+    text-decoration: none;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.arrow:hover {
+    background-color: #555;
+}
+
+.arrow-left {
+    margin-left: 10px;
+}
+
+.arrow-right {
+    position: fixed;
+    margin-right: 10px;
+    right: 10px;
+}

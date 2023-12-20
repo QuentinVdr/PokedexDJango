@@ -157,7 +157,13 @@ def get_pokemon_detail(pokemon_id):
 def pokemon_detail(request, pokemon_id):
     try:
         pokemon_detail = get_pokemon_detail(pokemon_id)
-        return render(request, 'pokedex/pokemon_detail.html', {'pokemon_detail': pokemon_detail})
+        next_pokemon_id = pokemon_id + 1
+        prev_pokemon_id = pokemon_id - 1
+        return render(request, 'pokedex/pokemon_detail.html', {
+            'pokemon_detail': pokemon_detail,
+            'next_pokemon_id': next_pokemon_id,
+            'prev_pokemon_id': prev_pokemon_id,
+        })
     except Exception as e:
         request.session['error'] = f"Erreur : {e}"
         return redirect('index')
