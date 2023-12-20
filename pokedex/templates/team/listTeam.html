@@ -1,6 +1,6 @@
 {% include 'base/start_html_base.html' with titre="Créer une équipe" navbar="true" %}
 
-<section class="container mx-auto mt-8">
+<section class="container mx-auto mt-8 px-8">
     <h1 class="text-3xl font-bold mb-4 mt-4">Liste de mes équipes</h1>
     <p class="mb-4">Nombre d'équipe : {{ list_team|length }}</p>
 
@@ -22,28 +22,40 @@
 
                 <ul class="grid grid-cols-2 gap-4">
                     <li class="text-center">
+                        <a href="{% url 'detail_pokemon' team.pokemon_1.id %}" class="hover:underline">
                         {{ team.pokemon_1.name }}
                         <img class="w-16 h-16 mx-auto" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ team.pokemon_1.id }}.png" alt="{{ team.pokemon_1.name }} image">
+                        </a>
                     </li>
                     <li class="text-center">
+                        <a href="{% url 'detail_pokemon' team.pokemon_2.id %}" class="hover:underline">
                         {{ team.pokemon_2.name }}
                         <img class="w-16 h-16 mx-auto" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ team.pokemon_2.id }}.png" alt="{{ team.pokemon_2.name }} image">
+                        </a>
                     </li>
                     <li class="text-center">
+                        <a href="{% url 'detail_pokemon' team.pokemon_3.id %}" class="hover:underline">
                         {{ team.pokemon_3.name }}
                         <img class="w-16 h-16 mx-auto" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ team.pokemon_3.id }}.png" alt="{{ team.pokemon_3.name }} image">
+                        </a>
                     </li>
                     <li class="text-center">
+                        <a href="{% url 'detail_pokemon' team.pokemon_4.id %}" class="hover:underline">
                         {{ team.pokemon_4.name }}
                         <img class="w-16 h-16 mx-auto" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ team.pokemon_4.id }}.png" alt="{{ team.pokemon_4.name }} image">
+                        </a>
                     </li>
                     <li class="text-center">
+                        <a href="{% url 'detail_pokemon' team.pokemon_5.id %}" class="hover:underline">
                         {{ team.pokemon_5.name }}
                         <img class="w-16 h-16 mx-auto" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ team.pokemon_5.id }}.png" alt="{{ team.pokemon_5.name }} image">
+                        </a>
                     </li>
                     <li class="text-center">
+                        <a href="{% url 'detail_pokemon' team.pokemon_6.id %}" class="hover:underline">
                         {{ team.pokemon_6.name }}
                         <img class="w-16 h-16 mx-auto" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ team.pokemon_6.id }}.png" alt="{{ team.pokemon_6.name }} image">
+                        </a>
                     </li>
                 </ul>
             </div>
