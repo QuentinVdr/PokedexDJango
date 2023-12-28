@@ -56,7 +56,8 @@
 }
 
 .results li {
-    width: calc(25% - 20px);
+    /* width: calc(25% - 20px); */
+    width: 280px;
     box-sizing: border-box;
     border: 1px solid black;
     border-radius: 10px;

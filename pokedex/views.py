@@ -127,15 +127,21 @@ def get_all_pokemon_data(request):
             print(f"Temps total d'exécution : {total_duration} secondes")
         if query == None:
             query = ""
-        user = request.user
-        userProfil = UserProfile.objects.get(user=user)
-        pokemon_user = Pokemon.objects.filter(user=userProfil)
-        pokemon_id_api = [pokemon.pokemon_api_id for pokemon in pokemon_user]
-        return render(request, 'pokedex/index.html', {'pokemon_list': all_pokemon, 'pokemon_user': pokemon_id_api, 'search': query})
+
+        error = request.session.get('error', '')
+        request.session['error'] = ''
+
+        #si l'utilisateur est connecté, on récupère ses pokemons
+        if request.user.is_authenticated:
+            user = request.user
+            userProfil = UserProfile.objects.get(user=user)
+            pokemon_user = Pokemon.objects.filter(user=userProfil)
+            pokemon_id_api = [pokemon.pokemon_api_id for pokemon in pokemon_user]
+            return render(request, 'pokedex/index.html', {'pokemon_list': all_pokemon, 'pokemon_user': pokemon_id_api, 'search': query, 'error': error})
+        return render(request, 'pokedex/index.html', {'pokemon_list': all_pokemon, 'search': query, 'error': error})
     except Exception as e:
         request.session['error'] = f"Erreur : {e}"
         return render(request, 'pokedex/index.html')
-
 
 def get_filtered_pokemon(query, all_pokemon):
     return [pokemon for pokemon in all_pokemon if query.lower() in pokemon['name'].lower()]
@@ -152,13 +158,27 @@ def get_pokemon_detail(pokemon_id):
 
         return pokemon_detail
     except Exception as e:
-        raise e  # Gérez les erreurs selon vos besoins
+        raise e 
 
 def pokemon_detail(request, pokemon_id):
     try:
         pokemon_detail = get_pokemon_detail(pokemon_id)
-        next_pokemon_id = pokemon_id + 1
-        prev_pokemon_id = pokemon_id - 1
+        url_all_pokemon = f"{API_URL}?limit={10000}"
+        all_pokemon = fetch_pokemon_data(url_all_pokemon)
+        # find next and prev pokemon id
+        index_pokemon = 0
+        url_pokemon = pokemon_detail['url']
+        for pokemon in all_pokemon['results']:
+            if pokemon['url'] == url_pokemon:
+                break
+            index_pokemon += 1
+        
+        next_pokemon_id = None
+        prev_pokemon_id = None
+        if index_pokemon != 0:
+            prev_pokemon_id = get_id_from_url(all_pokemon['results'][index_pokemon-1]['url'])
+        if index_pokemon != len(all_pokemon['results'])-1:
+            next_pokemon_id = get_id_from_url(all_pokemon['results'][index_pokemon+1]['url'])
         return render(request, 'pokedex/pokemon_detail.html', {
             'pokemon_detail': pokemon_detail,
             'next_pokemon_id': next_pokemon_id,
@@ -167,6 +187,9 @@ def pokemon_detail(request, pokemon_id):
     except Exception as e:
         request.session['error'] = f"Erreur : {e}"
         return redirect('index')
+
+def get_id_from_url(url):
+    return url.split('/')[-2]
 # login page
 def login_user(request):
     if request.method == "POST":
