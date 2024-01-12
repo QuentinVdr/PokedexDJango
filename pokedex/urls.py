@@ -15,11 +15,14 @@ urlpatterns = [
    path('team/list/', views.team_list, name='team_list'),
    path('team/manage/<int:team_id>/', views.update_team, name='update_team'),
    path('team/delete/<int:team_id>/', views.delete_team, name='delete_team'),
-   path('fight/history/', views.fight_history, name='fight_history'),
+   path('team/registerfight/<int:team_id>/', views.register_fight_team, name='register_fight'),
+   path('fight/', views.fight, name='fight'),
+   path('fight/action/', views.fight_action, name='fight_action'),
    path('pokemon/detail/<int:pokemon_id>/', views.pokemon_detail, name='detail_pokemon'),
    path('pokemon/buy/', views.buy_pokemon, name='buy_pokemon'),
    path('pokemon/detail/prev/<int:pokemon_id>/', views.pokemon_detail, name='prev_pokemon_detail'),
    path('pokemon/detail/next/<int:pokemon_id>/', views.pokemon_detail, name='next_pokemon_detail'),
+   path('api/fight/', views.api_fight, name='api_fight'),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
