@@ -1,5 +1,3 @@
-![image](https://github.com/QuentinVdr/PokedexDJango/assets/93726221/b4d7b6ab-4b5c-4a36-9e1f-e0a546bcdb6d)# PokedexDJango
-
 ## Technologies
 - Framework : [Django](https://www.djangoproject.com/)
 - Framework CSS : [Tailwind](https://tailwindcss.com/)
