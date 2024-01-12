@@ -477,3 +477,98 @@ ul li {
     color: #fff;
     background-color: #6c757d;
 }
+
+.fight{
+    display: grid;
+    font-family: 'Press Start 2P', cursive;
+    grid-gap: 1rem;
+    grid-template: "message" 10rem
+                     "fight" 1fr
+                     "action" 10rem;
+
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    
+    .fight-message{
+        padding: 3rem;
+        grid-area: message;
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .fight-info {
+        margin: auto;
+    }
+
+    .fight-container{
+        grid-area: fight;
+        display: grid;
+        grid-template-columns: 1fr min-content 1fr;
+        grid-gap: 1rem;
+        justify-content: center;
+        align-items: center;
+        background-color: #9dc1a4;
+      border: 15px solid #727d71;
+      border-radius: 20px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+
+    .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 3rem;
+    }
+
+
+    .fight-action{
+        margin: 8rem auto 0 auto;
+        grid-area: action;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-gap: 1rem;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .fight-action-button{
+        height: 3.5rem;
+        margin: 2rem;
+        padding: 1rem;
+        border-radius: 5px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease, border-color 0.3s ease;
+        /* centrer au milieu de la ligne */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .fight-action-container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: row;
+    }
+
+    .fight-action-button:hover{
+        background-color: #6c757d;
+        color: #fff;
+        transition: all 0.3s ease, border-color 0.3s ease;
+        /* ajouter une fleche pleine devant avec un before */
+    }
+
+    .fight-action-button:hover::before{
+        content: ">";
+        color: #fff;
+        font-size: 1.5rem;
+    }
+}

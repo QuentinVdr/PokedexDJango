@@ -41,7 +41,7 @@
                 </div>
             </div>
             <div>
-                <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign in</button>
+                <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">S'inscrire</button>
             </div>
         </form>
 
@@ -70,7 +70,9 @@
             confirm_password_error.classList.add('hidden');
             confirm_password_valid = true;
         }
-        let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+        <!--regex pour vérifier si le mdp est de la forme : 8 caractères, une majuscule, une minuscule et un chiffre (peut contenir des caractères spéciaux)-->
+        let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        console.log(regex.test(password.value));
         if (regex.test(password.value)) {
             password_error.classList.add('hidden');
             password_regex_valid = true;

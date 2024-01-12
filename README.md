@@ -6,11 +6,11 @@
 - API : [PokeApi](https://pokeapi.co/)
 
 ## Installation
-- Clone the repository
+- Cloner le répertoire 
 ```bash
 git clone https://github.com/QuentinVdr/PokedexDJango.git
 ```
-- Create a virtual environment
+- Crée un environnement virtuel
 ```bash
 python -m venv ./venv
 # Windows
@@ -18,49 +18,18 @@ python -m venv ./venv
 # Linux/Mac
 source ./venv/bin/activate
 ```
-- Install the dependencies
+- Installer les dépendances
 ```bash
 pip install -r requirements.txt
 ```
-- Run the server
+
+- Installer la base de données
+```
+python manage.py migrate
+```
+
+
+- Démarrer le serveur
 ```bash
 python manage.py runserver
 ```
-
-> **_NOTE:_**  Don't forget to update the requirements.txt file if you install a new package with
-> ```bash
-> pip freeze > requirements.txt
-> ```
-
-## Features
-- [ ] List of all pokemons
-- [ ] Search bar
-  - [ ] Pokemon name
-  - [ ] Pokemon generation
-  - [ ] Pokemon type
-- [ ] Pokemon details
-  - [ ] Pokemon types
-  - [ ] Pokemon evolution
-  - [ ] Pokemon stats
-  - [ ] Pokemon moves
-  - [ ] Pokemon abilities
-- [ ] Pokemon combat
-  - [ ] PvP local
-  - [ ] PvE
-  - [ ] Pokemon coin earning
-- [ ] Manage user
-  - [ ] Login
-  - [ ] Register
-  - [ ] Logout
-  - [ ] Change password
-  - [ ] Change username
-  - [ ] Delete account
-- [ ] Manage your team
-  - [ ] Add a pokemon
-  - [ ] Remove a pokemon
-  - [ ] Rename a pokemon
-  - [ ] Change the order of your team
-- [ ] Pokemon shop
-  - [ ] Buy Pokemon
-  - [ ] Sell Pokemon
-  - [ ] Buy Potion
