@@ -1,6 +1,6 @@
-from dotenv import load_dotenv
-import os
+# from dotenv import load_dotenv
+# import os
 
-load_dotenv()
+# load_dotenv()
 
-API_URL = os.getenv('API_URL')
+API_URL = "https://pokeapi.co/api/v2/pokemon/"
