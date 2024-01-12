@@ -1,0 +1,84 @@
+{% include 'base/start_html_base.html' with titre="Créer une équipe" navbar="true" %}
+
+<section class="container mx-auto mt-8 px-8">
+    <h1 class="text-3xl font-bold mb-4 mt-4">Liste de mes équipes</h1>
+    <p class="mb-4">Nombre d'équipe : {{ list_team|length }}</p>
+
+    <a href="{% url 'create_team' %}" class="bg-blue-500 text-white py-2 px-4 rounded inline-block mb-4">Créer une équipe</a>
+    
+    {% if in_fight %}
+        <a href="{% url 'fight' %}" class="bg-blue-500 text-white py-2 px-4 rounded inline-block mb-4">Retourner au combat</a>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for team in list_team %}
+            <div class="bg-gray-100 p-4 rounded mb-4 shadow-md transition duration-300 hover:shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold">{{ team.name }}</h2>
+                    {% if not in_fight %}
+                    <form id="fight-form-{{ team.id }}" method="POST" action="{% url 'register_fight' team.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded transition duration-300 hover:bg-blue-700">Combattre</button>
+                    </form>
+                    {% endif %}
+                    <div class="flex space-x-2">
+                        <form id="delete-form-{{ team.id }}" method="POST" action="{% url 'delete_team' team.id %}">
+                            {% csrf_token %}
+                            <button type="button" class="bg-red-500 text-white py-2 px-4 rounded transition duration-300 hover:bg-red-700" onclick="confirmDelete('{{ team.id }}')">Supprimer</button>
+                        </form>
+                        <a href="{% url 'update_team' team.id %}" class="bg-green-500 text-white py-2 px-4 rounded transition duration-300 hover:bg-green-700">Modifier</a>
+                    </div>
+                </div>
+
+                <ul class="grid grid-cols-2 gap-4">
+                    <li class="text-center">
+                        <a href="{% url 'detail_pokemon' team.pokemon_1.id %}" class="hover:underline">
+                        {{ team.pokemon_1.name }}
+                        <img class="w-16 h-16 mx-auto" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ team.pokemon_1.id }}.png" alt="{{ team.pokemon_1.name }} image">
+                        </a>
+                    </li>
+                    <li class="text-center">
+                        <a href="{% url 'detail_pokemon' team.pokemon_2.id %}" class="hover:underline">
+                        {{ team.pokemon_2.name }}
+                        <img class="w-16 h-16 mx-auto" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ team.pokemon_2.id }}.png" alt="{{ team.pokemon_2.name }} image">
+                        </a>
+                    </li>
+                    <li class="text-center">
+                        <a href="{% url 'detail_pokemon' team.pokemon_3.id %}" class="hover:underline">
+                        {{ team.pokemon_3.name }}
+                        <img class="w-16 h-16 mx-auto" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ team.pokemon_3.id }}.png" alt="{{ team.pokemon_3.name }} image">
+                        </a>
+                    </li>
+                    <li class="text-center">
+                        <a href="{% url 'detail_pokemon' team.pokemon_4.id %}" class="hover:underline">
+                        {{ team.pokemon_4.name }}
+                        <img class="w-16 h-16 mx-auto" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ team.pokemon_4.id }}.png" alt="{{ team.pokemon_4.name }} image">
+                        </a>
+                    </li>
+                    <li class="text-center">
+                        <a href="{% url 'detail_pokemon' team.pokemon_5.id %}" class="hover:underline">
+                        {{ team.pokemon_5.name }}
+                        <img class="w-16 h-16 mx-auto" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ team.pokemon_5.id }}.png" alt="{{ team.pokemon_5.name }} image">
+                        </a>
+                    </li>
+                    <li class="text-center">
+                        <a href="{% url 'detail_pokemon' team.pokemon_6.id %}" class="hover:underline">
+                        {{ team.pokemon_6.name }}
+                        <img class="w-16 h-16 mx-auto" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ team.pokemon_6.id }}.png" alt="{{ team.pokemon_6.name }} image">
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<script>
+    function confirmDelete(teamId) {
+        if (confirm("Êtes-vous sûr de vouloir supprimer cette équipe ?")) {
+            document.getElementById('delete-form-' + teamId).submit();
+        }
+    }
+</script>
+
+{% include 'base/end_html_base.html' %}

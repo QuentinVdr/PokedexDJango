@@ -1,0 +1,99 @@
+{% include 'base/start_html_base.html' %}
+    
+
+<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+        <img class="mx-auto h-20 w-auto" src="https://user-images.githubusercontent.com/37731582/39395092-949193b4-4ada-11e8-9f21-c049a771bbcc.png">
+        <h2 class="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">S'inscrire</h2>
+    </div>
+
+    <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+        <form class="space-y-3" action="{% url 'register' %}" method="POST">
+            {% csrf_token %}
+            <div>
+                <label for="username" class="block text-sm font-medium leading-6 text-gray-900">Nom d'utilisateur</label>
+                <div class="mt-2">
+                    <input id="username" name="username" type="text" autocomplete="username" required autofocus class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                </div>
+            </div>
+            <div>
+                <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Adresse email</label>
+                <div class="mt-2">
+                    <input id="email" name="email" type="email" autocomplete="email" required class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                </div>
+            </div>
+            <div>
+                <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Mot de passe</label>
+                <div class="mt-2">
+                    <input id="password" name="password" type="password" autocomplete="current-password" required class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                    <div id="password_error" class="invalid-feedback hidden text-sm font-medium text-red-500">
+                        Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre
+                        </div>
+                </div>
+            </div>
+            <div>
+                <label for="confirm_password" class="block text-sm font-medium leading-6 text-gray-900">Confirmer le mot de passe</label>
+                <div class="mt-2">
+                    <input id="confirm_password" name="confirm_password" type="password" autocomplete="current-password" required class="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                    <div id="confirm_password_error" class="invalid-feedback hidden text-sm font-medium text-red-500">
+                        Les mots de passe ne correspondent pas
+                    </div>
+                </div>
+            </div>
+            <div>
+                <button type="submit" class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">S'inscrire</button>
+            </div>
+        </form>
+
+        <p class="mt-10 text-center text-sm text-gray-500">
+            Pas encore de compte ?
+            <a href="{% url 'login' %}" class="font-semibold leading-6 text-indigo-600 hover:text-indigo-500">Se connecter</a>
+        </p>
+    </div>
+</div>
+<script>
+    let password = document.getElementById("password")
+    let confirm_password = document.getElementById("confirm_password");
+    let password_valid = false;
+    let confirm_password_error = document.getElementById("confirm_password_error");
+    let password_error = document.getElementById("password_error");
+
+    function validatePassword(){
+        let password_regex_valid = false;
+        let confirm_password_valid = false;
+        console.log('validatePassword');
+        if(password.value != confirm_password.value) {
+            if (confirm_password.value.length > 0) {
+                confirm_password_error.classList.remove('hidden');
+            }
+        } else {
+            confirm_password_error.classList.add('hidden');
+            confirm_password_valid = true;
+        }
+        <!--regex pour vérifier si le mdp est de la forme : 8 caractères, une majuscule, une minuscule et un chiffre (peut contenir des caractères spéciaux)-->
+        let regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        console.log(regex.test(password.value));
+        if (regex.test(password.value)) {
+            password_error.classList.add('hidden');
+            password_regex_valid = true;
+        } else {
+            password_error.classList.remove('hidden');
+        }
+        password_valid = password_regex_valid && confirm_password_valid;
+    }
+
+    password.addEventListener("change", validatePassword);
+    confirm_password.addEventListener("keyup", validatePassword);
+
+    let form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        console.log('submit');
+        if (form.checkValidity() === false || password_valid === false) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    }, false);
+
+</script>
+{% include 'base/end_html_base.html' %}

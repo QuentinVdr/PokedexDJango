@@ -1,0 +1,71 @@
+{% include 'base/start_html_base.html' with titre="Liste de mes Pokémons" navbar="true" %}
+<div class="pokemon-details-detail">
+    <h1>{{ pokemon_detail.name }} - Détails du Pokémon</h1>
+    <div class="pokemon-summary">
+        <div class="pokemon-image">
+            <img src="{{ pokemon_detail.image }}" alt="{{ pokemon_detail.name }}">
+        </div>
+        <div class="pokemon-info-detail">
+            <div class="info-section">
+                <h2>Informations</h2>
+                <table>
+                    <tr>
+                        <td>ID:</td>
+                        <td>{{ pokemon_detail.id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Taille:</td>
+                        <td>{{ pokemon_detail.height }} cm</td>
+                    </tr>
+                    <tr>
+                        <td>Poids:</td>
+                        <td>{{ pokemon_detail.weight }} g</td>
+                    </tr>
+                    <tr>
+                        <td>Types:</td>
+                        <td>
+                            <ul>
+                                {% for type in pokemon_detail.types %}
+                                     <span class="type type-{{ type|lower }}">{{ type }}</span>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Abilities:</td>
+                        <td>
+                            <ul>
+                                {% for ability in pokemon_detail.abilities %}
+                                    <span class="ability ability-{{ ability|lower }}">{{ ability }}</span>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+        <div class="pokemon-stats">
+            <h2 class="stats-heading">Stats:</h2>
+            <ul>
+                {% for stat, value in pokemon_detail.stats.items %}
+                    <li>
+                        <span>{{ stat }}:</span>
+                        <progress class="stat-bar" max="200" value="{{ value }}"></progress>
+                        {{ value }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="boutton-container">
+            {% if prev_pokemon_id %}
+                <a href="{% url 'detail_pokemon' pokemon_id=prev_pokemon_id %}" class="pokemon-nav-button prev-button">Pokémon Précédent</a>
+            {% endif %}
+            {% if next_pokemon_id %}
+                <a href="{% url 'detail_pokemon' pokemon_id=next_pokemon_id %}" class="pokemon-nav-button next-button">Pokémon Suivant</a>
+            {% endif %}
+        </div>
+    </div>
+
+
+{% include 'base/end_html_base.html' %}

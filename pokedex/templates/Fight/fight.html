@@ -1,0 +1,82 @@
+{% include 'base/start_html_base.html' with titre="Combat" navbar="true" %}
+
+<section class="fight">
+    <div class="fight-message">
+        {% if wait_other_player %}
+            <span>En attente de l'autre joueur</span>
+        {% else %}
+            <span>{{fight.last_message}}</span>
+        {% endif %}
+    </div>
+    <div class="fight-container">
+        <div class="left fight-info">
+            <div class="username">{{team1.name}}</div>
+            <div class="pokemon">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{team1.pokemon.pokemon_api_id}}.png" alt="{{team1.pokemon.name}}">
+                <div class="pokemon-name">{{team1.pokemon.name}}</div>
+                <div class="pokemon-hp">
+                    <div class="pokemon-hp-text">{{fight.team1_life}}❤</div>
+                </div>
+            </div>
+        </div>
+        <div class="center">VS</div>
+        <div class="right fight-info">
+            <div class="username">{{team2.name}}</div>
+            <div class="pokemon">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{team2.pokemon.pokemon_api_id}}.png" alt="{{team2.pokemon.name}}">
+                <div class="pokemon-name">{{team2.pokemon.name}}</div>
+                <div class="pokemon-hp">
+                    <div class="pokemon-hp-text">{{fight.team2_life}}❤</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="fight-action">
+        {% if can_play %}
+            <span>Choississez une action</span>
+            <div class="fight-action-container">
+                <div>
+            <button type="button" class="fight-action-button" onclick="fight(1)">Attaquer</button>
+            </div>
+            <div>
+            <button type="button" class="fight-action-button" onclick="fight(2)">Se défendre</button>
+            </div>
+            <div>
+            <button type="button" class="fight-action-button" onclick="fight(3)">Feinte</button>
+        </div>
+        </div>
+            <form id="fight-form" method="POST" action="{% url 'fight_action' %}" autocomplete="off">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="0">
+        </form>
+        <script>
+            if ( window.history.replaceState ) {
+                window.history.replaceState( null, null, window.location.href );
+            }
+
+            function fight(action) {
+                const form = document.getElementById('fight-form');
+                const actionInput = document.querySelector('input[name="action"]');
+                actionInput.value = action;
+                form.submit();
+            }
+        </script>
+        {% elif wait_other_player %}
+            <span>En attente de l'autre joueur</span>
+            <script>
+                setInterval(function(){
+                    fetch("{% url 'api_fight' %}")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.can_play) {
+                            window.location.reload();
+                        }
+                    });
+                }, 1000);
+            </script>
+        {% endif %}
+    </div>
+    
+</section>
+
+{% include 'base/end_html_base.html' %}

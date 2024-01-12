@@ -1,0 +1,10 @@
+{% include 'base/start_html_base.html' with titre="Liste de mes Pokémons" navbar="true" %}
+    <h1>Liste de mes Pokémons</h1>
+    <ul>
+        {% for pokemon in pokemons %}
+            <li>{{ pokemon.name }}</li>
+        {% empty %}
+            <li>Vous n'avez pas de pokémon</li>
+        {% endfor %}
+    </ul>
+{% include 'base/end_html_base.html' %}
